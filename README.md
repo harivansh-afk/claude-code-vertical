@@ -8,7 +8,32 @@ Scale your Claude Code usage horizontally and vertically.
 **Vertical**: Each plan spawns multiple weavers executing specs concurrently
 <img width="1978" height="1506" alt="image" src="https://github.com/user-attachments/assets/a8687d18-1529-439a-a513-926846d2f6b6" />
 
+## Installation
 
+Install to any project with a single command:
+
+```bash
+# From your project directory
+/path/to/claude-code-vertical/install.sh
+
+# Or specify target explicitly
+./install.sh /path/to/your/project
+```
+
+This creates symlinks in your project's `.claude/` directory:
+
+```
+your-project/.claude/
+  commands/      -> slash commands (/plan, /build, /status)
+  skills/        -> agent skills (planner, orchestrator, weaver, verifier)
+  skill-index/   -> library of additional skills
+  lib/           -> tmux helpers
+  vertical/plans/  -> where your plans live
+```
+
+**Prerequisites:**
+- [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code)
+- tmux: `brew install tmux`
 
 ## Quick Start
 
