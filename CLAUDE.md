@@ -22,14 +22,6 @@ Orchestrator (tmux background)
     └─→ Weaver 03 (tmux) → Verifier (subagent) → PR
 ```
 
-## Commands
-
-| Command | Description |
-|---------|-------------|
-| `/plan` | Start interactive planning session |
-| `/build <plan-id>` | Execute a plan (spawns orchestrator + weavers) |
-| `/status [plan-id]` | Check status of plans and weavers |
-
 ## Quick Start
 
 ```bash

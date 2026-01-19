@@ -57,14 +57,6 @@ Orchestrator (tmux background)
     └─→ Weaver 03 (tmux) → Verifier (subagent) → PR
 ```
 
-## Commands
-
-| Command | Description |
-|---------|-------------|
-| `/plan` | Start interactive planning session |
-| `/build <plan-id>` | Execute plan via tmux weavers |
-| `/status [plan-id]` | Check plan/weaver status |
-
 ## Directory Structure
 
 ```
