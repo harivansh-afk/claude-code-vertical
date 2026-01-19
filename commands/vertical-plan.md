@@ -1,113 +1,82 @@
 ---
-description: Check status of plans and weavers. Shows tmux sessions, weaver progress, and PRs.
-argument-hint: [plan-id]
+description: Start an interactive planning session. Design specs through Q&A, then hand off to build.
+argument-hint: [description]
 ---
 
-# /status Command
+# /plan Command
 
-Check the status of plans and weavers.
+Start a planning session. You become the planner agent.
 
 ## Usage
 
 ```
-/status                    # All plans
-/status plan-20260119-1430 # Specific plan
+/plan
+/plan Add user authentication with OAuth
 ```
 
-## Output
+## What Happens
 
-### All Plans
+1. Load the planner skill from `skills/planner/SKILL.md`
+2. Generate a plan ID: `plan-YYYYMMDD-HHMMSS`
+3. Create plan directory: `.claude/vertical/plans/<plan-id>/`
+4. Enter interactive planning mode
+
+## Planning Flow
+
+1. **Understand** - Ask questions until the task is crystal clear
+2. **Research** - Explore the codebase, find patterns
+3. **Design** - Break into specs (each = one PR)
+4. **Write** - Create spec files in `specs/` directory
+5. **Hand off** - Tell user to run `/build <plan-id>`
+
+## Spec Output
+
+Specs go to: `.claude/vertical/plans/<plan-id>/specs/`
 
 ```
-=== Active Tmux Sessions ===
-vertical-plan-20260119-1430-orch
-vertical-plan-20260119-1430-w-01
-vertical-plan-20260119-1430-w-02
-vertical-plan-20260119-1445-orch
-
-=== Plan Status ===
-  plan-20260119-1430: running
-  plan-20260119-1445: running
-  plan-20260119-1400: complete
+01-schema.yaml
+02-backend.yaml
+03-frontend.yaml
 ```
 
-### Specific Plan
+## Transitioning to Build
+
+When specs are ready:
 
 ```
-=== Plan: plan-20260119-1430 ===
-Status: running
-Started: 2026-01-19T14:35:00Z
+Specs ready. To execute:
 
-=== Specs ===
-  01-schema.yaml
-  02-backend.yaml
-  03-frontend.yaml
+  /build <plan-id>
 
-=== Weavers ===
-  w-01    complete   01-schema.yaml      https://github.com/owner/repo/pull/42
-  w-02    verifying  02-backend.yaml     -
-  w-03    waiting    03-frontend.yaml    -
+To execute specific specs:
 
-=== Tmux Sessions ===
-  vertical-plan-20260119-1430-orch    running
-  vertical-plan-20260119-1430-w-01    done
-  vertical-plan-20260119-1430-w-02    running
+  /build <plan-id> 01-schema 02-backend
+
+To check status:
+
+  /status <plan-id>
 ```
 
-## Weaver Statuses
+## Multiple Planning Sessions
 
-| Status | Meaning |
-|--------|---------|
-| waiting | Waiting for dependency |
-| building | Implementing the spec |
-| verifying | Running verification checks |
-| fixing | Fixing verification failures |
-| complete | PR created successfully |
-| failed | Failed after max iterations |
-| blocked | Dependency failed |
+You can run multiple planning sessions in parallel:
 
-## Quick Commands
+```
+# Terminal 1
+/plan Add authentication
 
-```bash
-# Source helpers
-source lib/tmux.sh
-
-# List all sessions
-vertical_list_sessions
-
-# Status for all plans
-vertical_status
-
-# Weaver status for a plan
-vertical_weaver_status plan-20260119-1430
-
-# Capture recent output from a weaver
-vertical_capture_output vertical-plan-20260119-1430-w-01
-
-# Attach to a session
-vertical_attach vertical-plan-20260119-1430-w-01
+# Terminal 2
+/plan Add payment processing
 ```
 
-## Reading Results
+Each gets its own plan-id and can be built independently.
 
-After completion:
+## Resuming
 
-```bash
-# Summary
-cat .claude/vertical/plans/plan-20260119-1430/run/summary.md
+Planning sessions are Claude Code sessions. Resume with:
 
-# State
-cat .claude/vertical/plans/plan-20260119-1430/run/state.json | jq
-
-# Specific weaver
-cat .claude/vertical/plans/plan-20260119-1430/run/weavers/w-01.json | jq
+```
+claude --resume <session-id>
 ```
 
-## PRs Created
-
-When weavers complete, PRs are listed in:
-- The summary.md file
-- Each weaver's status JSON (`pr` field)
-- The overall state.json (`weavers.<id>.pr`)
-
-Merge order is indicated in summary.md for stacked PRs.
+The session ID is saved in `.claude/vertical/plans/<plan-id>/meta.json`.
