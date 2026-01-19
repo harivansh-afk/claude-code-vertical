@@ -1,7 +1,6 @@
 ---
 name: orchestrator
 description: Manages weaver execution via tmux. Reads specs, selects skills, launches weavers in parallel, tracks progress. Runs in background.
-model: claude-opus-4-5-20250514
 ---
 
 # Orchestrator

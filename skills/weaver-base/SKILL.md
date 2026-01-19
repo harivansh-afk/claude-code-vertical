@@ -1,7 +1,6 @@
 ---
 name: weaver-base
 description: Base skill for all weavers. Implements specs, spawns verifiers, loops until pass, creates PR. Tests are never committed.
-model: claude-opus-4-5-20250514
 ---
 
 # Weaver Base

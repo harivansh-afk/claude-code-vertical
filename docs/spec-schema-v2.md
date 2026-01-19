@@ -112,7 +112,7 @@ verification_spec:
 # === REVIEW (before weaver execution) ===
 review_spec:
   type: subagent                 # Spawn reviewer before building
-  model: claude-opus-4-5-20250514  # Review uses Opus 4.5
+  # Uses current session model (Opus 4.5 recommended)
   prompt: |
     Review this spec for quality before building:
     

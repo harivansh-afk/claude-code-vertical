@@ -1,7 +1,6 @@
 ---
 name: oracle
 description: Deep planning via Oracle CLI (GPT-5.2 Codex). Use for complex tasks requiring extended thinking (10-60 minutes). Outputs plan.md for planner to transform into specs.
-model: claude-opus-4-5-20250514
 ---
 
 # Oracle

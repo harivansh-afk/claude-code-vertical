@@ -1,7 +1,6 @@
 ---
 name: verifier
 description: Verification subagent. Runs checks from verification_spec in order. Fast-fails on first error. Reports PASS or FAIL with evidence. Does NOT modify code.
-model: claude-opus-4-5-20250514
 ---
 
 # Verifier
