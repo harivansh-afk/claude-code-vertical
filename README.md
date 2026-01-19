@@ -10,30 +10,11 @@ Scale your Claude Code usage horizontally and vertically.
 
 ## Installation
 
-Install to any project with a single command:
-
 ```bash
-# From your project directory
-/path/to/claude-code-vertical/install.sh
-
-# Or specify target explicitly
-./install.sh /path/to/your/project
+curl -fsSL https://raw.githubusercontent.com/harivansh-afk/claude-code-vertical/main/install.sh | bash
 ```
 
-This creates symlinks in your project's `.claude/` directory:
-
-```
-your-project/.claude/
-  commands/      -> slash commands (/plan, /build, /status)
-  skills/        -> agent skills (planner, orchestrator, weaver, verifier)
-  skill-index/   -> library of additional skills
-  lib/           -> tmux helpers
-  vertical/plans/  -> where your plans live
-```
-
-**Prerequisites:**
-- [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code)
-- tmux: `brew install tmux`
+Requires: [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code), tmux (`brew install tmux`)
 
 ## Quick Start
 
