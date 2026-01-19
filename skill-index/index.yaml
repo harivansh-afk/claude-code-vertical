@@ -1,0 +1,282 @@
+# Skill Index
+# Orchestrator uses this to match skill_hints from specs to actual skills
+#
+# Format:
+#   id: unique identifier (matches directory name)
+#   path: relative path to SKILL.md
+#   description: what the skill does
+#   triggers: keywords that activate this skill
+#   domains: broad categories
+
+skills:
+  # === iOS/Swift Development ===
+
+  - id: axiom-swift-concurrency
+    path: skill-index/skills/axiom-swift-concurrency/SKILL.md
+    description: "Swift 6 strict concurrency patterns with actor isolation and async/await"
+    triggers:
+      - actor-isolated
+      - Sendable
+      - data race
+      - MainActor
+      - async/await
+      - swift concurrency
+      - thread safe
+    domains:
+      - ios
+      - swift
+      - concurrency
+
+  - id: axiom-swiftui-performance
+    path: skill-index/skills/axiom-swiftui-performance/SKILL.md
+    description: "SwiftUI performance optimization, view identity, and rendering efficiency"
+    triggers:
+      - swiftui slow
+      - view redraws
+      - swiftui performance
+      - body called
+      - swiftui optimization
+    domains:
+      - ios
+      - swiftui
+      - performance
+
+  - id: axiom-swiftui-debugging
+    path: skill-index/skills/axiom-swiftui-debugging/SKILL.md
+    description: "SwiftUI debugging techniques and common issue resolution"
+    triggers:
+      - swiftui not updating
+      - view not refreshing
+      - swiftui bug
+      - swiftui debug
+    domains:
+      - ios
+      - swiftui
+      - debugging
+
+  - id: axiom-swiftui-architecture
+    path: skill-index/skills/axiom-swiftui-architecture/SKILL.md
+    description: "SwiftUI app architecture patterns and best practices"
+    triggers:
+      - swiftui architecture
+      - swiftui patterns
+      - view model
+      - observable
+    domains:
+      - ios
+      - swiftui
+      - architecture
+
+  - id: axiom-swift-performance
+    path: skill-index/skills/axiom-swift-performance/SKILL.md
+    description: "Swift performance optimization and profiling"
+    triggers:
+      - swift slow
+      - swift performance
+      - optimize swift
+      - profiling
+    domains:
+      - ios
+      - swift
+      - performance
+
+  - id: axiom-swift-testing
+    path: skill-index/skills/axiom-swift-testing/SKILL.md
+    description: "Swift Testing framework patterns and best practices"
+    triggers:
+      - swift testing
+      - unit test
+      - xctest
+      - test swift
+    domains:
+      - ios
+      - swift
+      - testing
+
+  - id: axiom-xcode-debugging
+    path: skill-index/skills/axiom-xcode-debugging/SKILL.md
+    description: "Xcode debugging, build issues, and environment troubleshooting"
+    triggers:
+      - xcode error
+      - build failed
+      - xcode debug
+      - simulator
+      - provisioning
+    domains:
+      - ios
+      - xcode
+      - debugging
+
+  - id: axiom-build-debugging
+    path: skill-index/skills/axiom-build-debugging/SKILL.md
+    description: "Build system debugging, SPM conflicts, dependency issues"
+    triggers:
+      - build error
+      - spm conflict
+      - dependency
+      - linker error
+      - module not found
+    domains:
+      - ios
+      - build
+      - debugging
+
+  - id: axiom-memory-debugging
+    path: skill-index/skills/axiom-memory-debugging/SKILL.md
+    description: "Memory leak detection, retain cycles, and memory optimization"
+    triggers:
+      - memory leak
+      - retain cycle
+      - memory warning
+      - heap
+      - instruments memory
+    domains:
+      - ios
+      - memory
+      - debugging
+
+  - id: axiom-networking
+    path: skill-index/skills/axiom-networking/SKILL.md
+    description: "Network.framework patterns and URLSession best practices"
+    triggers:
+      - networking
+      - urlsession
+      - api call
+      - http request
+      - network error
+    domains:
+      - ios
+      - networking
+
+  - id: axiom-swiftdata
+    path: skill-index/skills/axiom-swiftdata/SKILL.md
+    description: "SwiftData persistence patterns and best practices"
+    triggers:
+      - swiftdata
+      - modelcontainer
+      - modelcontext
+      - persistence
+    domains:
+      - ios
+      - data
+      - persistence
+
+  - id: axiom-database-migration
+    path: skill-index/skills/axiom-database-migration/SKILL.md
+    description: "Safe database schema migrations for SwiftData, Core Data, GRDB"
+    triggers:
+      - migration
+      - schema change
+      - database upgrade
+      - model version
+    domains:
+      - ios
+      - data
+      - migration
+
+  - id: axiom-grdb
+    path: skill-index/skills/axiom-grdb/SKILL.md
+    description: "GRDB SQLite patterns and best practices"
+    triggers:
+      - grdb
+      - sqlite
+      - database query
+      - sql
+    domains:
+      - ios
+      - data
+      - sqlite
+
+  - id: axiom-ui-testing
+    path: skill-index/skills/axiom-ui-testing/SKILL.md
+    description: "UI testing with XCUITest and accessibility identifiers"
+    triggers:
+      - ui test
+      - xcuitest
+      - automation
+      - accessibility identifier
+      - ui recording
+    domains:
+      - ios
+      - testing
+      - ui
+
+  # === General Development ===
+
+  - id: coding-agent
+    path: skill-index/skills/coding-agent/SKILL.md
+    description: "Run Claude Code, Codex, or other coding agents in background"
+    triggers:
+      - spawn agent
+      - background agent
+      - coding agent
+      - codex
+    domains:
+      - orchestration
+      - agents
+
+  - id: tmux
+    path: skill-index/skills/tmux/SKILL.md
+    description: "Remote-control tmux sessions for interactive CLIs"
+    triggers:
+      - tmux
+      - terminal session
+      - pane
+      - session management
+    domains:
+      - terminal
+      - orchestration
+
+  # === Communication ===
+
+  - id: slack
+    path: skill-index/skills/slack/SKILL.md
+    description: "Slack messaging and workspace integration"
+    triggers:
+      - slack
+      - message slack
+      - slack channel
+    domains:
+      - communication
+
+  # === Utilities ===
+
+  - id: summarize
+    path: skill-index/skills/summarize/SKILL.md
+    description: "Summarize URLs, podcasts, and documents"
+    triggers:
+      - summarize
+      - transcript
+      - tldr
+    domains:
+      - utility
+
+  - id: oracle
+    path: skill-index/skills/oracle/SKILL.md
+    description: "Oracle CLI for prompt bundling and file attachments"
+    triggers:
+      - oracle
+      - prompt bundle
+    domains:
+      - utility
+
+  - id: clawdhub
+    path: skill-index/skills/clawdhub/SKILL.md
+    description: "Search and install agent skills from clawdhub.com"
+    triggers:
+      - clawdhub
+      - install skill
+      - skill registry
+    domains:
+      - skills
+      - registry
+
+  - id: bird
+    path: skill-index/skills/bird/SKILL.md
+    description: "X/Twitter CLI for reading, searching, and posting"
+    triggers:
+      - twitter
+      - tweet
+      - x post
+    domains:
+      - social
