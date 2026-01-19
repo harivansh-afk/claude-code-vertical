@@ -69,10 +69,6 @@ claude-code-vertical/
 │   ├── weaver-base/       # Base skill for all weavers
 │   ├── verifier/          # Verification subagent
 │   └── oracle/            # Deep planning with GPT-5.2 Codex
-├── commands/
-│   ├── vertical-plan.md
-│   ├── vertical-build.md
-│   └── vertical-status.md
 ├── skill-index/
 │   ├── index.yaml         # Skill registry
 │   └── skills/            # Available skills
