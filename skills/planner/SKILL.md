@@ -1,7 +1,7 @@
 ---
 name: planner
 description: Interactive planning agent. Designs verification specs through Q&A with the human. Uses Oracle for complex planning. Hands off to orchestrator for execution.
-model: opus
+model: claude-opus-4-5-20250514
 ---
 
 # Planner
