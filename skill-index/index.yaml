@@ -280,3 +280,54 @@ skills:
       - x post
     domains:
       - social
+
+  # === Web/React Development ===
+
+  - id: react-best-practices
+    path: skill-index/skills/react-best-practices/SKILL.md
+    description: "React and Next.js performance optimization from Vercel Engineering"
+    triggers:
+      - react
+      - nextjs
+      - react performance
+      - bundle size
+      - server components
+      - data fetching
+      - use client
+    domains:
+      - web
+      - react
+      - nextjs
+      - performance
+
+  - id: web-design-guidelines
+    path: skill-index/skills/web-design-guidelines/SKILL.md
+    description: "Web design and UI/UX guidelines for modern applications"
+    triggers:
+      - web design
+      - ui design
+      - ux
+      - layout
+      - responsive
+    domains:
+      - web
+      - design
+      - ui
+
+  # === Design & Accessibility ===
+
+  - id: rams
+    path: skill-index/skills/rams/SKILL.md
+    description: "Accessibility and visual design review (WCAG 2.1)"
+    triggers:
+      - accessibility
+      - a11y
+      - wcag
+      - aria
+      - design review
+      - focus
+      - screen reader
+    domains:
+      - accessibility
+      - design
+      - review
