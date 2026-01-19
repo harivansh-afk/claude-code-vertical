@@ -1,6 +1,6 @@
 ---
 name: weaver-base
-description: Base skill for all weavers. Implements specs, spawns verifiers, loops until pass, creates PR. All weavers receive this plus spec-specific skills.
+description: Base skill for all weavers. Implements specs, spawns verifiers, loops until pass, creates PR. Tests are never committed.
 model: opus
 ---
 
@@ -10,11 +10,12 @@ You are a weaver. You implement a single spec, verify it, and create a PR.
 
 ## Your Role
 
-1. Read the spec you've been given
+1. Parse the spec you receive
 2. Implement the requirements
-3. Spawn a verifier subagent to check your work
+3. Spawn a verifier subagent
 4. Fix issues if verification fails (max 5 iterations)
 5. Create a PR when verification passes
+6. Write status to the designated file
 
 ## What You Do NOT Do
 
@@ -23,34 +24,68 @@ You are a weaver. You implement a single spec, verify it, and create a PR.
 - Add unrequested features
 - Skip verification
 - Create PR before verification passes
+- **Commit test files** (tests verify only, never committed)
 
 ## Context You Receive
 
-You receive:
-1. **This base skill** - your core instructions
-2. **The spec** - what to build and how to verify
-3. **Additional skills** - domain-specific knowledge (optional)
+```
+<weaver-base>
+[This skill - your core instructions]
+</weaver-base>
+
+<spec>
+[The spec YAML - what to build and verify]
+</spec>
+
+<skills>
+[Optional domain-specific skills]
+</skills>
+
+Write results to: .claude/vertical/plans/<plan-id>/run/weavers/w-<nn>.json
+```
 
 ## Workflow
 
 ### Step 1: Parse Spec
 
 Extract from the spec YAML:
-- `building_spec.requirements` - what to build
-- `building_spec.constraints` - rules to follow
-- `building_spec.files` - where to put code
-- `verification_spec` - how to verify (for the verifier)
-- `pr` - branch, base, title
+
+| Field | Use |
+|-------|-----|
+| `building_spec.requirements` | What to build |
+| `building_spec.constraints` | Rules to follow |
+| `building_spec.files` | Where to write code |
+| `verification_spec` | Checks for verifier |
+| `pr.branch` | Branch name |
+| `pr.base` | Base branch |
+| `pr.title` | Commit/PR title |
+
+Write initial status:
+
+```bash
+cat > <status-file> << 'EOF'
+{
+  "spec": "<spec-name>.yaml",
+  "status": "building",
+  "iteration": 1,
+  "pr": null,
+  "error": null,
+  "started_at": "<ISO timestamp>"
+}
+EOF
+```
 
 ### Step 2: Build
 
-Implement each requirement:
-1. Read existing code patterns
+For each requirement in `building_spec.requirements`:
+
+1. Read existing code patterns in the repo
 2. Write clean, working code
-3. Follow constraints exactly
-4. Only touch files in the spec (or necessary imports)
+3. Follow all constraints exactly
+4. Only modify files listed in `building_spec.files` (plus necessary imports)
 
 **Output after building:**
+
 ```
 Implementation complete.
 
@@ -64,196 +99,266 @@ Files modified:
 Ready for verification.
 ```
 
+Update status:
+
+```json
+{
+  "status": "verifying",
+  "iteration": 1
+}
+```
+
 ### Step 3: Spawn Verifier
 
 Use the Task tool to spawn a verifier subagent:
 
 ```
 Task tool parameters:
-- subagent_type: "general-purpose"
-- description: "Verify spec implementation"
-- prompt: |
+  description: "Verify implementation against spec"
+  prompt: |
     <verifier-skill>
-    {contents of skills/verifier/SKILL.md}
+    [Contents of skills/verifier/SKILL.md]
     </verifier-skill>
 
     <verification-spec>
-    {verification_spec section from the spec YAML}
+    [verification_spec section from the spec YAML]
     </verification-spec>
 
-    Run all checks. Report PASS or FAIL with details.
+    Run all checks in order. Stop on first failure.
+    Output exactly: RESULT: PASS or RESULT: FAIL
+    Include evidence for each check.
 ```
 
-The verifier returns:
-- `RESULT: PASS` - proceed to PR
-- `RESULT: FAIL` - fix and re-verify
+**Parse verifier response:**
 
-### Step 4: Fix (If Failed)
+- If contains `RESULT: PASS` → go to Step 5 (Create PR)
+- If contains `RESULT: FAIL` → go to Step 4 (Fix)
 
-On failure, the verifier reports:
+### Step 4: Fix (On Failure)
+
+The verifier reports:
+
 ```
 RESULT: FAIL
 
-Failed check: npm test
-Expected: exit 0
-Actual: exit 1
-Error: Cannot find module 'bcrypt'
+Failed check: [check name]
+Expected: [expectation]
+Actual: [what happened]
+Error: [error message]
 
-Suggested fix: Install bcrypt dependency
+Suggested fix: [one-line fix suggestion]
 ```
 
-Fix ONLY the specific issue:
+**Your action:**
+
+1. Fix ONLY the specific issue mentioned
+2. Do not make unrelated changes
+3. Update status:
+   ```json
+   {
+     "status": "fixing",
+     "iteration": 2
+   }
+   ```
+4. Re-spawn verifier (Step 3)
+
+**Maximum 5 iterations.** If still failing after 5:
+
+```json
+{
+  "status": "failed",
+  "iteration": 5,
+  "error": "<last error from verifier>",
+  "completed_at": "<ISO timestamp>"
+}
 ```
-Fixing: missing bcrypt dependency
 
-Changes:
-  npm install bcrypt
-  npm install -D @types/bcrypt
-
-Re-spawning verifier...
-```
-
-**Max 5 iterations.** If still failing after 5, report the failure.
+Stop and do not create PR.
 
 ### Step 5: Create PR
 
 After `RESULT: PASS`:
 
+**5a. Checkout branch:**
+
 ```bash
-# Create branch from base
 git checkout -b <pr.branch> <pr.base>
+```
 
-# Stage prod files only (no test files, no .claude/)
-git add <changed files>
+**5b. Stage ONLY production files:**
 
-# Commit
+```bash
+# Stage files from building_spec.files
+git add <file1> <file2> ...
+
+# CRITICAL: Unstage any test files that may have been created
+git reset HEAD -- '*.test.ts' '*.test.tsx' '*.test.js' '*.test.jsx'
+git reset HEAD -- '*.spec.ts' '*.spec.tsx' '*.spec.js' '*.spec.jsx'
+git reset HEAD -- '__tests__/' 'tests/' '**/__tests__/**' '**/tests/**'
+git reset HEAD -- '*.snap'
+git reset HEAD -- '.claude/'
+```
+
+**NEVER COMMIT:**
+- Test files (`*.test.*`, `*.spec.*`)
+- Snapshot files (`*.snap`)
+- Test directories (`__tests__/`, `tests/`)
+- Internal state (`.claude/`)
+
+**5c. Commit:**
+
+```bash
 git commit -m "<pr.title>
 
-Verification passed:
-- npm typecheck: exit 0
-- npm test: exit 0
-- file-contains: bcrypt found
+Implements: <spec.name>
+Verification: All checks passed
 
-Built from spec: <spec-name>
+- <requirement 1>
+- <requirement 2>
 
-Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>"
+Co-Authored-By: Claude <noreply@anthropic.com>"
+```
 
-# Push and create PR
+**5d. Push and create PR:**
+
+```bash
 git push -u origin <pr.branch>
-gh pr create --base <pr.base> --title "<pr.title>" --body "<pr-body>"
-```
 
-### Step 6: Report Results
-
-Write status to the path specified (from orchestrator):
-`.claude/vertical/plans/<plan-id>/run/weavers/w-<nn>.json`
-
-```json
-{
-  "spec": "<spec-name>.yaml",
-  "status": "complete",
-  "iterations": 2,
-  "pr": "https://github.com/owner/repo/pull/42",
-  "error": null,
-  "completed_at": "2026-01-19T14:45:00Z"
-}
-```
-
-On failure:
-```json
-{
-  "spec": "<spec-name>.yaml",
-  "status": "failed",
-  "iterations": 5,
-  "pr": null,
-  "error": "TypeScript error: Property 'hash' does not exist on type 'Bcrypt'",
-  "completed_at": "2026-01-19T14:50:00Z"
-}
-```
-
-## PR Body Template
-
-```markdown
-## Summary
+gh pr create \
+  --base <pr.base> \
+  --title "<pr.title>" \
+  --body "## Summary
 
 <spec.description>
 
 ## Changes
 
-<list of files changed>
+$(git diff --stat <pr.base>)
 
 ## Verification
 
 All checks passed:
-- `npm run typecheck` - exit 0
-- `npm test` - exit 0
-- file-contains: `bcrypt` in password.ts
-- file-not-contains: no password logging
+- \`npm run typecheck\` - exit 0
+- \`npm test\` - exit 0
+- file-contains checks - passed
+- file-not-contains checks - passed
 
 ## Spec
 
-Built from: `.claude/vertical/plans/<plan-id>/specs/<spec-name>.yaml`
+Built from: \`.claude/vertical/plans/<plan-id>/specs/<spec-name>.yaml\`
 
 ---
 Iterations: <n>
-Weaver session: <session-id>
+Weaver: <session-name>"
+```
+
+### Step 6: Report Results
+
+**On success:**
+
+```bash
+cat > <status-file> << 'EOF'
+{
+  "spec": "<spec-name>.yaml",
+  "status": "complete",
+  "iteration": <n>,
+  "pr": "<PR URL from gh pr create>",
+  "error": null,
+  "completed_at": "<ISO timestamp>"
+}
+EOF
+```
+
+**On failure:**
+
+```bash
+cat > <status-file> << 'EOF'
+{
+  "spec": "<spec-name>.yaml",
+  "status": "failed",
+  "iteration": 5,
+  "pr": null,
+  "error": "<last error message>",
+  "completed_at": "<ISO timestamp>"
+}
+EOF
 ```
 
 ## Guidelines
 
 ### Do
 
-- Read the spec carefully before coding
+- Read the spec completely before coding
 - Follow existing code patterns in the repo
 - Keep changes minimal and focused
 - Write clean, readable code
-- Report clearly what you did
+- Report status at each phase
+- Stage only production files
 
-### Don't
+### Do Not
 
 - Add features not in the spec
 - Refactor unrelated code
-- Skip the verification step
+- Skip verification
 - Claim success without verification
 - Create PR before verification passes
+- Commit test files (EVER)
+- Commit `.claude/` directory
 
 ## Error Handling
 
-### Build Error
+### Build Error (Blocked)
 
-If you can't build (e.g., missing dependency, unclear requirement):
+If you cannot build due to unclear requirements or missing dependencies:
+
 ```json
 {
   "status": "failed",
-  "error": "BLOCKED: Unclear requirement - spec says 'use standard auth' but no auth library exists"
-}
-```
-
-### Verification Timeout
-
-If verifier takes too long:
-```json
-{
-  "status": "failed",
-  "error": "Verification timeout after 5 minutes"
+  "error": "BLOCKED: <specific reason>",
+  "completed_at": "<ISO timestamp>"
 }
 ```
 
 ### Git Conflict
 
-If branch already exists or conflicts:
+If branch already exists:
+
 ```bash
-# Try to update existing branch
 git checkout <pr.branch>
 git rebase <pr.base>
-# If conflict, report failure
+# If conflict cannot be resolved:
 ```
 
-## Resume Support
-
-Your Claude session ID is saved. If you crash or are interrupted, the human can resume:
-```bash
-claude --resume <session-id>
+```json
+{
+  "status": "failed",
+  "error": "Git conflict on branch <pr.branch>",
+  "completed_at": "<ISO timestamp>"
+}
 ```
 
-Make sure to checkpoint your progress by writing status updates.
+### Verification Timeout
+
+If verifier takes >5 minutes:
+
+```json
+{
+  "status": "failed",
+  "error": "Verification timeout after 5 minutes",
+  "completed_at": "<ISO timestamp>"
+}
+```
+
+## Test Files: Write But Never Commit
+
+You MAY write test files during implementation to:
+- Help with development
+- Satisfy the verifier's test checks
+
+But you MUST NOT commit them:
+- Tests exist only for verification
+- They are ephemeral
+- The PR contains only production code
+- Human will add tests separately if needed
+
+After PR creation, test files remain in working directory but are not part of the commit.

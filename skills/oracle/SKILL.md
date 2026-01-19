@@ -1,53 +1,119 @@
 ---
-name: oracle-planner
-description: Codex 5.2 planning specialist using oracle CLI + llmjunky's proven prompt patterns. Call when planning is complex or requires structured breakdown.
+name: oracle
+description: Deep planning via Oracle CLI (GPT-5.2 Codex). Use for complex tasks requiring extended thinking (10-60 minutes). Outputs plan.md for planner to transform into specs.
 model: opus
 ---
 
-# Oracle Planner - Codex Planning Specialist
+# Oracle
 
-Leverage oracle CLI with Codex 5.2 for deep, structured planning. Uses llmjunky's battle-tested prompt patterns.
+Oracle bundles your prompt + codebase files into a single request for GPT-5.2 Codex. Use it when planning is complex and requires deep, extended thinking.
 
-## When to Call Me
+## When to Use Oracle
 
-- Complex features needing careful breakdown
-- Multi-phase implementations
-- Unclear dependency graphs
-- Parallel task identification needed
-- Architecture decisions
-- Migration plans
-- Any planning where you need ~10min+ of deep thinking
+| Trigger | Why |
+|---------|-----|
+| 5+ specs needed | Complex dependency management |
+| Unclear dependency graph | Needs analysis |
+| Architecture decisions | Extended thinking helps |
+| Migration planning | Requires careful sequencing |
+| Performance optimization | Needs deep code analysis |
+| Any planning >10 minutes | Offload to Codex |
+
+## When NOT to Use Oracle
+
+- Simple 1-2 spec tasks
+- Clear, linear implementations
+- Bug fixes
+- Quick refactors
 
 ## Prerequisites
 
-Oracle CLI must be installed:
+Oracle CLI installed:
+
 ```bash
 npm install -g @steipete/oracle
 ```
 
-Reference: skill-index/skills/oracle/SKILL.md for oracle CLI best practices
+Or use npx:
 
-## How I Work
+```bash
+npx -y @steipete/oracle --help
+```
 
-1. **Planner gathers context** - uses AskUserTool for clarifying questions
-2. **Planner crafts perfect prompt** - following templates below
-3. **Planner calls oracle** - via CLI with full context
-4. **Oracle outputs plan.md** - structured breakdown from Codex 5.2
-5. **Planner transforms** - plan.md → spec yamls
+## Workflow
 
-## Calling Oracle (Exact Commands)
+### Step 1: Craft the Prompt
 
-**1. Preview first (no tokens spent):**
+Write to `/tmp/oracle-prompt.txt`:
+
+```
+Create a detailed implementation plan for [TASK].
+
+## Context
+- Project: [what the project does]
+- Stack: [frameworks, languages, tools]
+- Location: [key directories and files]
+
+## Requirements
+[ALL requirements gathered from human]
+- [Requirement 1]
+- [Requirement 2]
+- Features needed:
+  - [Feature A]
+  - [Feature B]
+- NOT needed: [explicit out-of-scope]
+
+## Plan Structure
+
+Output as plan.md with this structure:
+
+# Plan: [Task Name]
+
+## Overview
+[Summary + recommended approach]
+
+## Phase N: [Phase Name]
+### Task N.M: [Task Name]
+- Location: [file paths]
+- Description: [what to do]
+- Dependencies: [task IDs this depends on]
+- Complexity: [1-10]
+- Acceptance Criteria: [specific, testable]
+
+## Dependency Graph
+[Which tasks run parallel vs sequential]
+
+## Testing Strategy
+[What tests prove success]
+
+## Instructions
+- Write complete plan to plan.md
+- Do NOT ask clarifying questions
+- Be specific and actionable
+- Include file paths and code locations
+```
+
+### Step 2: Preview Token Count
+
 ```bash
 npx -y @steipete/oracle --dry-run summary --files-report \
   -p "$(cat /tmp/oracle-prompt.txt)" \
   --file "src/**" \
   --file "!**/*.test.*" \
-  --file "!**/*.snap"
+  --file "!**/*.snap" \
+  --file "!node_modules" \
+  --file "!dist"
 ```
-Check token count (target: <196k tokens). If over budget, narrow files.
 
-**2. Run with browser engine (main path):**
+**Target:** <196k tokens
+
+**If over budget:**
+- Narrow file selection
+- Exclude more test/build directories
+- Split into focused prompts
+
+### Step 3: Run Oracle
+
 ```bash
 npx -y @steipete/oracle \
   --engine browser \
@@ -62,225 +128,152 @@ npx -y @steipete/oracle \
   --file "!dist"
 ```
 
-**Why browser engine?**
+**Why browser engine:**
 - GPT-5.2 Codex runs take 10-60 minutes (normal)
-- Browser mode handles long runs + reattach
+- Browser mode handles long runs
 - Sessions stored in `~/.oracle/sessions`
+- Can reattach if timeout
 
-**3. Check status (if run detached):**
+### Step 4: Monitor
+
+Tell the human:
+```
+Oracle is running. This typically takes 10-60 minutes.
+I will check status periodically.
+```
+
+Check status:
+
 ```bash
 npx -y @steipete/oracle status --hours 1
 ```
 
-**4. Reattach to session:**
+### Step 5: Reattach (if timeout)
+
+If the CLI times out, do NOT re-run. Reattach:
+
 ```bash
-npx -y @steipete/oracle session <session-id> --render > /tmp/oracle-plan-result.txt
+npx -y @steipete/oracle session <session-id> --render > /tmp/oracle-result.txt
 ```
 
-**Important:**
-- Don't re-run if timeout - reattach instead
-- Use `--force` only if you truly want a duplicate run
-- Files >1MB are rejected (split or narrow match)
-- Default-ignored: node_modules, dist, coverage, .git, .next, build, tmp
+### Step 6: Read Output
 
-## Prompt Template
+Oracle writes `plan.md` to current directory. Read it:
 
-Use this EXACT structure when crafting my prompt:
+```bash
+cat plan.md
+```
+
+### Step 7: Transform to Specs
+
+Convert Oracle's phases/tasks → spec YAML files:
+
+| Oracle Output | Spec YAML |
+|---------------|-----------|
+| Phase N | Group of related specs |
+| Task N.M | Individual spec file |
+| Dependencies | pr.base field |
+| Location | building_spec.files |
+| Acceptance Criteria | verification_spec |
+
+## File Attachment Patterns
+
+**Include:**
+```bash
+--file "src/**"
+--file "prisma/**"
+--file "convex/**"
+```
+
+**Exclude:**
+```bash
+--file "!**/*.test.*"
+--file "!**/*.spec.*"
+--file "!**/*.snap"
+--file "!node_modules"
+--file "!dist"
+--file "!build"
+--file "!coverage"
+--file "!.next"
+```
+
+**Default ignored:** node_modules, dist, coverage, .git, .turbo, .next, build, tmp
+
+**Size limit:** Files >1MB are rejected
+
+## Prompt Templates
+
+### For Authentication
 
 ```
-Create a detailed implementation plan for [TASK].
+Create a detailed implementation plan for adding authentication.
+
+## Context
+- Project: [app name]
+- Stack: Next.js, Prisma, PostgreSQL
+- Location: src/pages/api/ for API, src/components/ for UI
 
 ## Requirements
-[List ALL requirements gathered from user]
-- [Requirement 1]
-- [Requirement 2]
-- Features needed:
-  - [Feature A]
-  - [Feature B]
-- NOT needed: [Explicitly state what's out of scope]
-
-## Plan Structure
-
-Use this template structure:
-
-```markdown
-# Plan: [Task Name]
-
-**Generated**: [Date]
-**Estimated Complexity**: [Low/Medium/High]
-
-## Overview
-[Brief summary of what needs to be done and the general approach, including recommended libraries/tools]
-
-## Prerequisites
-- [Dependencies or requirements that must be met first]
-- [Tools, libraries, or access needed]
-
-## Phase 1: [Phase Name]
-**Goal**: [What this phase accomplishes]
-
-### Task 1.1: [Task Name]
-- **Location**: [File paths or components involved]
-- **Description**: [What needs to be done]
-- **Dependencies**: [Task IDs this depends on, e.g., "None" or "1.2, 2.1"]
-- **Complexity**: [1-10]
-- **Test-First Approach**:
-  - [Test to write before implementation]
-  - [What the test should verify]
-- **Acceptance Criteria**:
-  - [Specific, testable criteria]
-
-### Task 1.2: [Task Name]
-[Same structure...]
-
-## Phase 2: [Phase Name]
-[...]
-
-## Testing Strategy
-- **Unit Tests**: [What to unit test, frameworks to use]
-- **Integration Tests**: [API/service integration tests]
-- **E2E Tests**: [Critical user flows to test end-to-end]
-- **Test Coverage Goals**: [Target coverage percentage]
-
-## Dependency Graph
-[Show which tasks can run in parallel vs which must be sequential]
-- Tasks with no dependencies: [list - these can start immediately]
-- Task dependency chains: [show critical path]
-
-## Potential Risks
-- [Things that could go wrong]
-- [Mitigation strategies]
-
-## Rollback Plan
-- [How to undo changes if needed]
-```
-
-### Task Guidelines
-Each task must:
-- Be specific and actionable (not vague)
-- Have clear inputs and outputs
-- Be independently testable
-- Include file paths and specific code locations
-- Include dependencies so parallel execution is possible
-- Include complexity score (1-10)
-
-Break large tasks into smaller ones:
-- ✗ Bad: "Implement Google OAuth"
-- ✓ Good:
-  - "Add Google OAuth config to environment variables"
-  - "Install and configure passport-google-oauth20 package"
-  - "Create OAuth callback route handler in src/routes/auth.ts"
-  - "Add Google sign-in button to login UI"
-  - "Write integration tests for OAuth flow"
-
-## Instructions
-- Write the complete plan to a file called `plan.md` in the current directory
-- Do NOT ask any clarifying questions - you have all the information needed
-- Be specific and actionable - include code snippets where helpful
-- Follow test-driven development: specify what tests to write BEFORE implementation for each task
-- Identify task dependencies so parallel work is possible
-- Just write the plan and save the file
-
-Begin immediately.
-```
-
-## Clarifying Question Patterns
-
-Before calling me, gather context with these question types:
-
-### For "implement auth"
-- What authentication methods do you need? (email/password, OAuth providers like Google/GitHub, SSO, magic links)
-- Do you need role-based access control (RBAC) or just authenticated/unauthenticated?
-- What's your backend stack? (Node/Express, Python/Django, etc.)
-- Where will you store user credentials/sessions? (Database, Redis, JWT stateless)
-- Do you need features like: password reset, email verification, 2FA?
-- Any compliance requirements? (SOC2, GDPR, HIPAA)
-
-### For "build an API"
-- What resources/entities does this API need to manage?
-- REST or GraphQL?
-- What authentication will the API use?
-- Expected scale/traffic?
-- Do you need rate limiting, caching, versioning?
-
-### For "migrate to microservices"
-- Which parts of the monolith are you migrating first?
-- What's your deployment target? (K8s, ECS, etc.)
-- How will services communicate? (REST, gRPC, message queues)
-- What's your timeline and team capacity?
-
-### For "add testing"
-- What testing levels do you need? (unit, integration, e2e)
-- What's your current test coverage?
-- What frameworks do you prefer or already use?
-- What's the most critical functionality to test first?
-
-### For "performance optimization"
-- What specific performance issues are you seeing?
-- Current metrics (load time, response time, throughput)?
-- What's the target performance?
-- Where are the bottlenecks? (DB queries, API calls, rendering)
-- What profiling have you done?
-
-### For "database migration"
-- What's the source and target database?
-- How much data needs to be migrated?
-- Can you afford downtime? If so, how much?
-- Do you need dual-write/read during migration?
-- What's your rollback strategy?
-
-## Example Prompt (Auth)
-
-**After gathering:**
 - Methods: Email/password + Google OAuth
-- Stack: Next.js + Prisma + PostgreSQL
-- Roles: Admin/User
+- Roles: Admin and User
 - Features: Password reset, email verification
-- No 2FA, no special compliance
-
-**Prompt to send me:**
-
-```
-Create a detailed implementation plan for adding authentication to a Next.js web application.
-
-## Requirements
-- Authentication methods: Email/password + Google OAuth
-- Framework: Next.js (App Router)
-- Database: PostgreSQL with Prisma ORM
-- Role-based access: Admin and User roles
-- Features needed:
-  - User registration and login
-  - Password reset flow
-  - Email verification
-  - Google OAuth integration
-  - Session management
-- NOT needed: 2FA, SSO, special compliance
+- NOT needed: 2FA, SSO
 
 ## Plan Structure
-[Use the full template above]
-
-## Instructions
-- Write the complete plan to a file called `plan.md` in the current directory
-- Do NOT ask any clarifying questions - you have all the information needed
-- Be specific and actionable - include code snippets where helpful
-- Follow test-driven development: specify what tests to write BEFORE implementation for each task
-- Identify task dependencies so parallel work is possible
-- Just write the plan and save the file
-
-Begin immediately.
+[standard structure]
 ```
 
-## Important Notes
+### For API Development
 
-- **I only output plan.md** - you transform it into spec yamls
-- **No interaction** - one-shot execution with full context
-- **Always gpt-5.2-codex + xhigh** - this is my configuration
-- **File output: plan.md** in current directory
-- **Parallel tasks identified** - I explicitly list dependencies
+```
+Create a detailed implementation plan for building a REST API.
 
-## After I Run
+## Context
+- Project: [app name]
+- Stack: [framework]
+- Location: src/api/ for routes
+
+## Requirements
+- Resources: [entities]
+- Auth: [method]
+- Rate limiting: [yes/no]
+- NOT needed: [out of scope]
+
+## Plan Structure
+[standard structure]
+```
+
+### For Migration
+
+```
+Create a detailed implementation plan for migrating [from] to [to].
+
+## Context
+- Current: [current state]
+- Target: [target state]
+- Constraints: [downtime, rollback needs]
+
+## Requirements
+- Data to migrate: [what]
+- Dual-write period: [yes/no]
+- Rollback strategy: [required]
+
+## Plan Structure
+[standard structure]
+```
+
+## Important Rules
+
+1. **One-shot execution** - Oracle doesn't interact, just outputs
+2. **Always gpt-5.2-codex** - Use Codex model for coding tasks
+3. **File output: plan.md** - Always outputs to current directory
+4. **Don't re-run on timeout** - Reattach to session instead
+5. **Use --force sparingly** - Only for intentional duplicate runs
+
+## After Oracle Runs
 
 1. Read `plan.md`
-2. Transform phases/tasks into spec yamls
-3. Map tasks to weavers
-4. Hand off to orchestrator
+2. Review phases and tasks
+3. Present breakdown to human for approval
+4. Transform to spec YAMLs
+5. Continue planner workflow

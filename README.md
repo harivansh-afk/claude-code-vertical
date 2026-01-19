@@ -31,20 +31,30 @@ claude
 > /status plan-20260119-1430
 ```
 
+## Documentation
+
+| Document | Description |
+|----------|-------------|
+| [WORKFLOW.md](WORKFLOW.md) | Complete workflow guide with examples |
+| [CLAUDE.md](CLAUDE.md) | Project instructions and quick reference |
+| [docs/spec-schema-v2.md](docs/spec-schema-v2.md) | Full spec YAML schema |
+
 ## Architecture
 
 ```
 You (Terminal)
-    |
-    v
-Planner (interactive)     <- You talk here
-    |
-    v (specs)
+    │
+    │ /plan
+    ▼
+Planner (interactive)     ← You talk here
+    │
+    │ (writes specs)
+    ▼
 Orchestrator (tmux background)
-    |
-    +-> Weaver 01 (tmux) -> Verifier (subagent) -> PR
-    +-> Weaver 02 (tmux) -> Verifier (subagent) -> PR
-    +-> Weaver 03 (tmux) -> Verifier (subagent) -> PR
+    │
+    ├─→ Weaver 01 (tmux) → Verifier (subagent) → PR
+    ├─→ Weaver 02 (tmux) → Verifier (subagent) → PR
+    └─→ Weaver 03 (tmux) → Verifier (subagent) → PR
 ```
 
 ## Commands
@@ -60,15 +70,17 @@ Orchestrator (tmux background)
 ```
 claude-code-vertical/
 ├── CLAUDE.md              # Project instructions
+├── WORKFLOW.md            # Complete workflow guide
 ├── skills/
 │   ├── planner/           # Interactive planning
 │   ├── orchestrator/      # Tmux + weaver management
 │   ├── weaver-base/       # Base skill for all weavers
-│   └── verifier/          # Verification subagent
+│   ├── verifier/          # Verification subagent
+│   └── oracle/            # Deep planning with GPT-5.2 Codex
 ├── commands/
-│   ├── plan.md
-│   ├── build.md
-│   └── status.md
+│   ├── vertical-plan.md
+│   ├── vertical-build.md
+│   └── vertical-status.md
 ├── skill-index/
 │   ├── index.yaml         # Skill registry
 │   └── skills/            # Available skills
@@ -83,15 +95,16 @@ claude-code-vertical/
 
 Every agent uses `claude-opus-4-5-20250514` for maximum capability.
 
+## Key Rules
+
+1. **Tests never ship** - Weavers may write tests for verification, but they're never committed
+2. **PRs always created** - Weaver success = PR created
+3. **Verification mandatory** - Weavers spawn verifier subagents
+4. **Context isolated** - Each agent sees only what it needs
+
 ## Skill Index
 
 The orchestrator matches `skill_hints` from specs to skills in `skill-index/index.yaml`.
-
-Current skills include:
-- Swift/iOS development (concurrency, SwiftUI, testing, debugging)
-- Build and memory debugging
-- Database and networking patterns
-- Agent orchestration tools
 
 ## Resume Any Session
 
@@ -113,3 +126,13 @@ vertical_list_sessions       # List tmux sessions
 vertical_attach <session>    # Attach to session
 vertical_kill_plan <plan-id> # Kill all sessions for a plan
 ```
+
+## Oracle for Complex Planning
+
+For complex tasks, the planner invokes Oracle (GPT-5.2 Codex) for deep planning:
+
+```bash
+npx -y @steipete/oracle --engine browser --model gpt-5.2-codex ...
+```
+
+Oracle runs 10-60 minutes and outputs `plan.md`, which the planner transforms into specs.
