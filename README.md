@@ -2,8 +2,13 @@
 
 Scale your Claude Code usage horizontally and vertically.
 
-- **Horizontal**: Run multiple planning sessions in parallel
-- **Vertical**: Each plan spawns multiple weavers executing specs concurrently
+**Horizontal**: Run multiple planning sessions in parallel
+<img width="3600" height="2338" alt="image" src="https://github.com/user-attachments/assets/e37ec8e9-64e4-4aa5-915f-b90eaf014995" />
+
+**Vertical**: Each plan spawns multiple weavers executing specs concurrently
+<img width="1978" height="1506" alt="image" src="https://github.com/user-attachments/assets/a8687d18-1529-439a-a513-926846d2f6b6" />
+
+
 
 ## Quick Start
 
