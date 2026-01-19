@@ -18,13 +18,13 @@ This system is **prompt-driven**. Every agent is Claude reading markdown instruc
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                                 HUMAN                                        │
+│                                 HUMAN                                       │
 │                                                                             │
 │   You talk to the Planner. Everything else runs in the background.          │
 │                                                                             │
 │   Commands:                                                                 │
 │     /plan              Start planning session                               │
-│     /build <plan-id>   Execute plan (spawns orchestrator + weavers)        │
+│     /build <plan-id>   Execute plan (spawns orchestrator + weavers)         │
 │     /status <plan-id>  Check progress                                       │
 │                                                                             │
 └─────────────────────────────────────────────────────────────────────────────┘
@@ -32,7 +32,7 @@ This system is **prompt-driven**. Every agent is Claude reading markdown instruc
                                      │ /plan
                                      ▼
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                           PLANNER (Interactive)                              │
+│                           PLANNER (Interactive)                             │
 │                                                                             │
 │   Location: Your terminal (direct Claude session)                           │
 │   Skill: skills/planner/SKILL.md                                            │
@@ -42,17 +42,17 @@ This system is **prompt-driven**. Every agent is Claude reading markdown instruc
 │     • Research the codebase                                                 │
 │     • Invoke Oracle for complex tasks (optional)                            │
 │     • Design specs (each spec = one PR)                                     │
-│     • Write specs to .claude/vertical/plans/<plan-id>/specs/               │
+│     • Write specs to .claude/vertical/plans/<plan-id>/specs/                │
 │                                                                             │
 │   Output: Spec YAML files + meta.json                                       │
-│   Handoff: Tells you to run /build <plan-id>                               │
+│   Handoff: Tells you to run /build <plan-id>                                │
 │                                                                             │
 └─────────────────────────────────────────────────────────────────────────────┘
                                      │
                                      │ /build <plan-id>
                                      ▼
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                        ORCHESTRATOR (tmux background)                        │
+│                        ORCHESTRATOR (tmux background)                       │
 │                                                                             │
 │   Location: tmux session "vertical-<plan-id>-orch"                          │
 │   Skill: skills/orchestrator/SKILL.md                                       │
