@@ -11,7 +11,7 @@ Scale your Claude Code usage horizontally and vertically.
 ## Installation
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/harivansh-afk/claude-code-vertical/main/install.sh | bash
+curl -fsSL https://git.harivan.sh/harivansh-afk/claude-code-vertical/raw/branch/main/install.sh | bash
 ```
 
 Requires: [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code), tmux (`brew install tmux`)
