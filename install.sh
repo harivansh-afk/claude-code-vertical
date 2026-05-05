@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-REPO="https://github.com/harivansh-afk/claude-code-vertical.git"
+REPO="https://git.harivan.sh/harivansh-afk/claude-code-vertical.git"
 TMP="/tmp/claude-code-vertical-$$"
 
 git clone --depth 1 "$REPO" "$TMP" 2>/dev/null
